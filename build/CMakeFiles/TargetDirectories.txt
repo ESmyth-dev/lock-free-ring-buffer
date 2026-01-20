@@ -1,0 +1,2 @@
+C:/Users/ESmyth/Development/lock-free-ring-buffer/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/ESmyth/Development/lock-free-ring-buffer/build/CMakeFiles/ZERO_CHECK.dir
