@@ -14,24 +14,27 @@ Buffer<DataType>::Buffer(std::size_t capacity)
 template <typename DataType>
 bool Buffer<DataType>::Add(DataType item)
 {
-    if (ShiftIndex(m_head) == m_tail )
+    if (m_head == m_tail && m_full)
         return false;
 
     m_contents[m_head] = item;
     m_head = ShiftIndex(m_head);
+    if (m_head == m_tail)
+        m_full = true;
     return true;
 }
 
 template <typename DataType>
 std::optional<DataType> Buffer<DataType>::Pop()
 {
-    if (m_head == m_tail)
+    if (m_tail == m_head && !m_full)
         return std::nullopt;
 
     auto item = m_contents[m_tail];
 
     m_tail = ShiftIndex(m_tail);
-
+    if (m_head == m_tail)
+        m_full = false;
     return item;
 }
 

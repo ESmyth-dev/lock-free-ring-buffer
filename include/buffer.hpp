@@ -14,11 +14,12 @@ class Buffer
 
     std::optional<DataType> Pop();
     
+    std::size_t m_capacity;
 
     private:
-    std::size_t m_capacity;
     std::size_t m_head;
     std::size_t m_tail;
+    bool m_full{false};
     std::vector<DataType> m_contents;
 
     std::size_t ShiftIndex(std::size_t start);

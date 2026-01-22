@@ -5,7 +5,12 @@ int main()
 {
     Buffer<int> buffer{10};
 
-    buffer.Add(4);
+    for (std::size_t i{0}; i < 10; ++i)
+    {
+        buffer.Add(2);
+    }
+
+    assert(buffer.Add(4)==false);
     buffer.Add(3);
 
     assert(buffer.Pop() == 4);
