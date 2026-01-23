@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <atomic>
 #include <optional>
 #include <cstddef>
 
@@ -17,9 +18,8 @@ class Buffer
     std::size_t m_capacity;
 
     private:
-    std::size_t m_head;
-    std::size_t m_tail;
-    bool m_full{false};
+    std::atomic<std::size_t> m_head;
+    std::atomic<std::size_t> m_tail;
     std::vector<DataType> m_contents;
 
     std::size_t ShiftIndex(std::size_t start);

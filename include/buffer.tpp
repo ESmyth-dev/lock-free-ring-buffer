@@ -5,7 +5,7 @@ template <typename DataType>
 Buffer<DataType>::Buffer(std::size_t capacity)
 : m_capacity{capacity}
 , m_head{}
-, m_tail{}
+, m_tail{m_capacity-1}
 , m_contents(capacity)
 {
     m_contents.reserve(capacity);
@@ -14,27 +14,27 @@ Buffer<DataType>::Buffer(std::size_t capacity)
 template <typename DataType>
 bool Buffer<DataType>::Add(DataType item)
 {
-    if (m_head == m_tail && m_full)
+    auto head = m_head.load(std::memory_order::relaxed);
+    if (head == m_tail.load(std::memory_order::relaxed))
         return false;
 
-    m_contents[m_head] = item;
-    m_head = ShiftIndex(m_head);
-    if (m_head == m_tail)
-        m_full = true;
+    m_contents[head] = item;
+    head = ShiftIndex(head);
+    m_head.store(head, std::memory_order::release);
     return true;
 }
 
 template <typename DataType>
 std::optional<DataType> Buffer<DataType>::Pop()
 {
-    if (m_tail == m_head && !m_full)
+    auto tail = m_tail.load(std::memory_order::relaxed);
+    tail = ShiftIndex(tail);
+    if (tail == m_head.load(std::memory_order::relaxed))
         return std::nullopt;
 
     auto item = m_contents[m_tail];
+    m_tail.store(tail, std::memory_order::release);
 
-    m_tail = ShiftIndex(m_tail);
-    if (m_head == m_tail)
-        m_full = false;
     return item;
 }
 

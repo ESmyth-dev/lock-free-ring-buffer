@@ -1,23 +1,25 @@
 #include <cassert>
+#include <thread>
+#include <iostream>
 #include "buffer.hpp"
 
 int main()
 {
-    Buffer<int> buffer{10};
+    constexpr int LOOPS{1000000};
+    Buffer<int> buffer{1000};
+    
 
-    for (std::size_t i{0}; i < 10; ++i)
-    {
-        buffer.Add(2);
-    }
+    std::thread t1{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){buffer.Add(i);}}};
+    std::thread t2{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){
+        retry:
+        auto result = buffer.Pop();
+        if (result == std::nullopt)
+        {
+            goto retry;
+        }
+        assert(*result==i);}}};
 
-    assert(buffer.Add(4)==false);
-    buffer.Add(3);
-
-    assert(buffer.Pop() == 4);
-
-    buffer.Add(10);
-
-    assert(buffer.Pop() == 3);
-
+    t1.join();
+    t2.join();
     return 0;
 }
