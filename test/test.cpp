@@ -27,4 +27,32 @@ TEST_CASE("Correct behaviour when adding to/removing from the buffer", "[buffer]
 
         REQUIRE(buffer.Pop() == std::nullopt);
     }
+
+    SECTION("Allows removing from and then adding to a full buffer")
+    {
+        for(std::size_t i{0}; i<buffer.m_capacity; ++i)
+        {
+            REQUIRE(buffer.Add(i));
+        }
+
+        REQUIRE(buffer.Pop() != std::nullopt);
+
+        REQUIRE(buffer.Add(1));
+    }
+
+    SECTION("Items are removed from the buffer in the order they are added")
+    {
+        for(std::size_t i{0}; i<5; ++i)
+        {
+            REQUIRE(buffer.Add(i));
+        }
+
+        REQUIRE(buffer.Pop() == 0);
+        REQUIRE(buffer.Pop() == 1);
+        REQUIRE(buffer.Pop() == 2);
+        REQUIRE(buffer.Pop() == 3);
+        REQUIRE(buffer.Add(1));
+        REQUIRE(buffer.Pop() == 4);
+        REQUIRE(buffer.Pop() == 1);
+    }
 }
