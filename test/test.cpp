@@ -65,24 +65,27 @@ TEST_CASE("Correct behaviour when running concurrently", "[buffer]")
     
     SECTION("Single producer, single consumer")
     {
-        std::thread t1{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){
+        std::thread t1{[&buffer](){
+        for (std::size_t i{0}; i < LOOPS; ++i){
         readd:
         auto result = buffer.Add(i);
         if (!result){
             goto readd;
         }
         }}};
-    std::thread t2{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){
-        retry:
-        auto result = buffer.Pop();
-        if (result == std::nullopt)
-        {
-            goto retry;
-        }
-        REQUIRE(*result==i);}}};
+        std::thread t2{[&buffer](){
+        for (std::size_t i{0}; i < LOOPS; ++i){
+            retry:
+            auto result = buffer.Pop();
+            if (result == std::nullopt)
+            {
+                goto retry;
+            }
+            REQUIRE(*result==i);
+        }}};
 
-    t1.join();
-    t2.join();
+        t1.join();
+        t2.join();
     }
     
 }
