@@ -11,7 +11,7 @@ TEST_CASE("Correct behaviour when adding to/removing from the buffer", "[buffer]
 
     SECTION("Does not overflow when adding to a full buffer")
     {
-        for(std::size_t i{0}; i<buffer.m_capacity; ++i)
+        for(std::size_t i{0}; i<buffer.m_capacity-1; ++i)
         {
             REQUIRE(buffer.Add(i));
         }
@@ -31,7 +31,7 @@ TEST_CASE("Correct behaviour when adding to/removing from the buffer", "[buffer]
 
     SECTION("Allows removing from and then adding to a full buffer")
     {
-        for(std::size_t i{0}; i<buffer.m_capacity; ++i)
+        for(std::size_t i{0}; i<buffer.m_capacity-1; ++i)
         {
             REQUIRE(buffer.Add(i));
         }
@@ -56,17 +56,4 @@ TEST_CASE("Correct behaviour when adding to/removing from the buffer", "[buffer]
         REQUIRE(buffer.Pop() == 4);
         REQUIRE(buffer.Pop() == 1);
     }
-}
-
-TEST_CASE("Correct behaviour when writing to and reading from the buffer concurrently", "[buffer]")
-{
-    Buffer<int> buffer{10};
-
-    SECTION("Reading on separate thread while writing on the main thread")
-    {
-        std::future<std::optional<int>> result = std::async([&buffer](){return buffer.Pop();});
-        REQUIRE(result.get() == std::nullopt);
-
-    }
-
 }

@@ -32,7 +32,7 @@ std::optional<DataType> Buffer<DataType>::Pop()
     if (tail == m_head.load(std::memory_order::relaxed))
         return std::nullopt;
 
-    auto item = m_contents[m_tail];
+    auto item = m_contents[tail];
     m_tail.store(tail, std::memory_order::release);
 
     return item;
