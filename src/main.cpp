@@ -9,7 +9,13 @@ int main()
     Buffer<int> buffer{1000};
     
 
-    std::thread t1{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){buffer.Add(i);}}};
+    std::thread t1{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){
+        readd:
+        auto result = buffer.Add(i);
+        if (!result){
+            goto readd;
+        }
+        }}};
     std::thread t2{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){
         retry:
         auto result = buffer.Pop();
