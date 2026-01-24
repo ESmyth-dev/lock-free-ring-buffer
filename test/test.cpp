@@ -1,4 +1,4 @@
-#include <future>
+#include <thread>
 #include <catch2/catch_test_macros.hpp>
 
 #include "buffer.hpp"
@@ -56,4 +56,33 @@ TEST_CASE("Correct behaviour when adding to/removing from the buffer", "[buffer]
         REQUIRE(buffer.Pop() == 4);
         REQUIRE(buffer.Pop() == 1);
     }
+}
+
+TEST_CASE("Correct behaviour when running concurrently", "[buffer]")
+{
+    constexpr int LOOPS{1000000};
+    Buffer<int> buffer{1000};
+    
+    SECTION("Single producer, single consumer")
+    {
+        std::thread t1{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){
+        readd:
+        auto result = buffer.Add(i);
+        if (!result){
+            goto readd;
+        }
+        }}};
+    std::thread t2{[&buffer](){for (std::size_t i{0}; i < LOOPS; ++i){
+        retry:
+        auto result = buffer.Pop();
+        if (result == std::nullopt)
+        {
+            goto retry;
+        }
+        REQUIRE(*result==i);}}};
+
+    t1.join();
+    t2.join();
+    }
+    
 }
