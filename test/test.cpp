@@ -1,4 +1,7 @@
 #include <thread>
+#include <array>
+#include <map>
+#include <iostream>
 #include <catch2/catch_test_macros.hpp>
 
 #include "buffer.hpp"
@@ -86,6 +89,51 @@ TEST_CASE("Correct behaviour when running concurrently", "[buffer]")
 
         t1.join();
         t2.join();
+    }
+
+    SECTION("Multi producer, single deferred consumer")
+    {
+        constexpr int LOOPS{2000};
+        constexpr int NUM_PRODUCERS{3};
+        Buffer<int> buffer{10000};
+        std::array<std::thread, NUM_PRODUCERS> producers{};
+
+        std::map<int, int> vals{};
+
+        for (std::size_t i{0}; i < LOOPS; ++i)
+        {
+            vals[i] = NUM_PRODUCERS;
+        }
+
+        for (std::size_t i{0}; i < NUM_PRODUCERS; ++i)
+        {
+            producers[i] = (std::thread{[&buffer](){
+            for (std::size_t i{0}; i < LOOPS; ++i){
+            readd:
+            auto result = buffer.Add(i);
+            if (!result){
+                goto readd;
+            }
+            }}});
+        }
+
+        for (std::thread& thread : producers)
+        {
+            thread.join();
+        }
+
+        for (std::size_t i{0}; i < LOOPS*3; ++i)
+        {
+            auto result = buffer.Pop();
+            REQUIRE_FALSE(result == std::nullopt);
+            REQUIRE_FALSE(vals[*result] == 0);
+            vals[*result] -= 1;
+        }
+
+        for (std::size_t i{0}; i < vals.size(); ++i)
+        {
+            assert(vals[i] == 0);
+        }
     }
     
 }
