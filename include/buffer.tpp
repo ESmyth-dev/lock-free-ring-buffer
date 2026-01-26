@@ -14,14 +14,18 @@ Buffer<DataType>::Buffer(std::size_t capacity)
 template <typename DataType>
 bool Buffer<DataType>::Add(DataType item)
 {
-    auto head = m_head.load(std::memory_order::relaxed);
-    if (head == m_tail.load(std::memory_order::relaxed))
+    auto oldHead = m_head.load(std::memory_order::acquire);
+    if (oldHead == m_tail.load(std::memory_order::relaxed))
         return false;
-
-    m_contents[head] = item;
-    head = ShiftIndex(head);
-    m_head.store(head, std::memory_order::release);
-    return true;
+    auto newHead = ShiftIndex(oldHead);
+    auto result = m_head.compare_exchange_strong(oldHead, newHead, std::memory_order::release);
+    if (result)
+    {
+        m_contents[oldHead] = item;
+        return true;
+    }
+    else
+        return false;
 }
 
 template <typename DataType>
