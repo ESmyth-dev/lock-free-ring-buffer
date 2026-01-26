@@ -62,12 +62,12 @@ TEST_CASE("Correct behaviour when adding to/removing from the buffer", "[buffer]
 }
 
 TEST_CASE("Correct behaviour when running concurrently", "[buffer]")
-{
-    constexpr int LOOPS{1000000};
-    Buffer<int> buffer{1000};
-    
+{   
     SECTION("Single producer, single consumer")
     {
+        constexpr int LOOPS{1000000};
+        Buffer<int> buffer{1000};
+        
         std::thread t1{[&buffer](){
         for (std::size_t i{0}; i < LOOPS; ++i){
         readd:
