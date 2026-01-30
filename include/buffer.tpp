@@ -1,4 +1,6 @@
 #include <optional>
+#include <utility>
+#include <atomic>
 #include "buffer.hpp"
 
 template <typename DataType>
@@ -23,7 +25,8 @@ bool Buffer<DataType>::Add(DataType item)
     if(!result)
         return false;
 
-    m_contents[oldHead] = item;
+    m_contents[oldHead].second = item;
+    m_contents[oldHead].first.store(true);
 
     while(m_readHead.load() != oldHead)
     {
@@ -43,7 +46,7 @@ std::optional<DataType> Buffer<DataType>::Pop()
     if (newTail == m_readHead.load(std::memory_order::relaxed))
         return std::nullopt;
 
-    auto item = m_contents[newTail];
+    auto item = m_contents[newTail].second;
     auto result = m_tail.compare_exchange_strong(oldTail, newTail, std::memory_order::release);
     if (result)
         return item;

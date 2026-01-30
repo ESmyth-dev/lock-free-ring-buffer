@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <utility>
 #include <atomic>
 #include <optional>
 #include <cstddef>
@@ -21,7 +22,7 @@ class Buffer
     std::atomic<std::size_t> m_writeHead;
     std::atomic<std::size_t> m_readHead;
     std::atomic<std::size_t> m_tail;
-    std::vector<DataType> m_contents;
+    std::vector<std::pair<std::atomic_bool,DataType>> m_contents;
 
     std::size_t ShiftIndex(std::size_t start);
 
