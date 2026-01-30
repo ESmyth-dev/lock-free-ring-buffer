@@ -18,7 +18,8 @@ class Buffer
     std::size_t m_capacity;
 
     private:
-    std::atomic<std::size_t> m_head;
+    std::atomic<std::size_t> m_writeHead;
+    std::atomic<std::size_t> m_readHead;
     std::atomic<std::size_t> m_tail;
     std::vector<DataType> m_contents;
 

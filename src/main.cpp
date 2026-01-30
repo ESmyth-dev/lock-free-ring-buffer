@@ -31,18 +31,14 @@ int main()
         }}});
     }
 
-    for (std::thread& thread : producers)
-    {
-        thread.join();
-    }
-
+    std::thread consumer = std::thread{[&](){
     for (std::size_t i{0}; i < LOOPS*3; ++i)
     {
+        reconsume:
         auto result = buffer.Pop();
         if (result == std::nullopt)
         {
-            std::cout << i << '\n';
-            assert(false);
+            goto reconsume;
         }
         else if (vals[*result] == 0)
         {
@@ -54,11 +50,20 @@ int main()
             vals[*result] -= 1;
         }
     }
+    }};
+
+    for (std::thread& thread : producers)
+    {
+        thread.join();
+    }
+
+    consumer.join();
 
     for (std::size_t i{0}; i < vals.size(); ++i)
     {
         assert(vals[i] == 0);
     }
 
+    std::cout << "Work complete\n";
     return 0;
 }
